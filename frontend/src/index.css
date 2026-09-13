@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+/* Tailwind v4 CSS-first theme config — mirrors the palette/fonts from the design brief */
+@theme {
+  --font-sans: "Plus Jakarta Sans", "Segoe UI", "Roboto", "Helvetica Neue", sans-serif;
+  --font-display: "Outfit", "Plus Jakarta Sans", sans-serif;
+
+  --color-crimson: #c83e65;
+  --color-crimson-dark: #af2b52;
+  --color-crimson-light: #d94d74;
+  --color-crimson-soft: #f48ba7;
+
+  --color-cream-50: #fffcf8;
+  --color-cream-100: #fdf9f3;
+  --color-cream-200: #fceeeb;
+  --color-cream-300: #f5dfda;
+
+  --color-tactical-olive: #4a5d4e;
+  --color-tactical-dark: #263328;
+}
+
+@import "tailwindcss";
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow-x: hidden;
+}
