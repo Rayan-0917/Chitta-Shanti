@@ -1,255 +1,277 @@
-# Chitta Shanti — Frontend
+# Chitta Shanti
 
-> **AI-Based Personnel Stress and Welfare Monitoring System for CAPFs / Armed Forces**
+## AI-Based Personnel Stress and Welfare Monitoring System
 
-Chitta Shanti is a web-based frontend for an AI-assisted personnel stress and welfare monitoring platform designed for personnel in CAPFs and the Armed Forces. The system is intended to support early identification of stress indicators, structured assessments, and role-based welfare intervention.
+Chitta Shanti is an AI-assisted personnel stress and welfare monitoring system designed for CAPFs and armed forces personnel.
 
-This repository contains the **React + Vite frontend** of the project.
+The system aims to support personnel wellbeing and operational readiness by combining assessment data, AI-based stress analysis, and role-specific welfare workflows.
 
----
+The application is designed around three primary user roles:
 
-## Project Overview
+- Candidate
+- Commander
+- Medical Officer
 
-Personnel working in high-pressure operational environments can experience prolonged psychological and occupational stress. Chitta Shanti aims to provide a structured digital platform through which personnel can complete assessments while authorized officers can review relevant information and coordinate welfare interventions.
-
-The frontend is being developed around three primary user roles:
-
-- **Candidate / Personnel** — completes stress assessments and views assessment history and profile.
-- **Commander** — accesses personnel rosters and relevant welfare information.
-- **Medical Officer** — handles welfare triage and intervention-related workflows.
+Each role receives a dedicated interface and access to functionality appropriate to its responsibilities.
 
 ---
 
-## Core Features
+## Current Project Status
 
-### Authentication
-- Login interface
-- Registration interface
-- Role-based access architecture
-- Protected routes
-- Authentication context for maintaining user state
+The project currently contains a working React frontend and FastAPI backend.
 
-### Candidate Portal
-The intended candidate workflow is:
-1. Receive an assessment question
-2. Record a video response
-3. Complete a structured questionnaire
-4. Submit the assessment
-5. View the resulting assessment information
-6. Review previous assessment history
-7. View profile information
+### Implemented
 
-### Commander Portal
-Planned functionality includes:
-- Personnel roster
-- Personnel-level welfare information
-- Stress-risk overview
-- Appropriate intervention workflows
+- Candidate, Commander, and Medical Officer role structure
+- User registration
+- User login
+- JWT-based authentication
+- Role-aware frontend routing
+- Authenticated user profile retrieval
+- Candidate profile page
+- Authenticated user information in the navigation bar
+- Logout and session clearing
+- Commander dashboard UI
+- Medical Officer dashboard UI
+- Welfare triage integration
+- Welfare intervention recording
+- Candidate assessment workflow UI
+- Backend MongoDB integration
+- FastAPI API documentation through Swagger
 
-### Medical / Welfare Portal
-Planned functionality includes:
-- Welfare triage
-- Identification of personnel requiring attention
-- Intervention management
-- Follow-up welfare workflows
+### Currently Being Developed
 
----
+- Candidate assessment submission integration
+- Submission of questionnaire responses to the backend
+- Assessment result integration
+- Assessment history
 
-## Technology Stack
-
-| Technology | Purpose |
-|---|---|
-| React | UI development |
-| Vite | Development server and build tooling |
-| Tailwind CSS | Styling and responsive UI |
-| React Router | Client-side routing |
-| Lucide React | UI icons |
-| Axios | API communication |
-
-### Backend
-
-The frontend is designed to communicate with a FastAPI-based backend.
-
-Backend repository:  
-https://github.com/Shrestha-Ain/Stress_Detector
-
-The backend uses technologies including FastAPI, MongoDB, JWT-based authentication, role-based access control, and AI/ML-based assessment processing.
+The assessment history interface is intentionally pending until the corresponding backend functionality is implemented.
 
 ---
 
-## Project Structure
+# System Architecture
 
 ```text
-frontend/
-├── public/
-│   └── favicon.svg
-├── src/
+                    ┌───────────────────────┐
+                    │        User           │
+                    └───────────┬───────────┘
+                                │
+                                ▼
+                    ┌───────────────────────┐
+                    │    React + Vite       │
+                    │       Frontend        │
+                    └───────────┬───────────┘
+                                │
+                         HTTP / REST API
+                                │
+                                ▼
+                    ┌───────────────────────┐
+                    │       FastAPI         │
+                    │        Backend        │
+                    └───────────┬───────────┘
+                                │
+                    ┌───────────┴───────────┐
+                    │                       │
+                    ▼                       ▼
+             ┌──────────────┐       ┌──────────────┐
+             │   MongoDB    │       │ AI / Video   │
+             │   Database   │       │  Processing  │
+             └──────────────┘       └──────────────┘
+```
+
+---
+
+# Technology Stack
+
+## Frontend
+
+- React
+- Vite
+- Tailwind CSS
+- React Router
+- Lucide React
+
+## Backend
+
+- Python
+- FastAPI
+- Uvicorn
+- PyMongo
+- MongoDB
+- Passlib
+- bcrypt
+- Python-JOSE
+- OpenCV
+- MediaPipe
+- Librosa
+
+---
+
+# Project Structure
+
+```text
+Chitta Shanti/
+│
+├── Backend/
 │   ├── api/
-│   │   ├── axiosClient.js
-│   │   ├── authApi.js
-│   │   └── assessmentApi.js
-│   ├── assets/
-│   │   └── images/
-│   ├── components/
-│   │   ├── auth/
-│   │   │   ├── LoginForm.jsx
-│   │   │   └── RegisterForm.jsx
-│   │   ├── candidate/
-│   │   │   ├── assessment/
-│   │   │   ├── history/
-│   │   │   └── profile/
-│   │   ├── commander/
-│   │   ├── home/
-│   │   │   ├── Header.jsx
-│   │   │   ├── Hero.jsx
-│   │   │   ├── HeroBackground.jsx
-│   │   │   ├── FeaturesSection.jsx
-│   │   │   ├── AboutSection.jsx
-│   │   │   └── Footer.jsx
-│   │   ├── welfare/
-│   │   └── common/
-│   │       ├── ProtectedRoute.jsx
-│   │       ├── Navbar.jsx
-│   │       ├── LoadingSpinner.jsx
-│   │       └── ErrorBanner.jsx
-│   ├── context/
-│   │   └── AuthContext.jsx
-│   ├── hooks/
-│   │   ├── useAuth.js
-│   │   └── useMediaRecorder.js
-│   ├── pages/
-│   │   ├── Homepage.jsx
-│   │   ├── LoginPage.jsx
-│   │   ├── RegisterPage.jsx
-│   │   ├── candidate/
-│   │   ├── commander/
-│   │   └── welfare/
-│   ├── App.css
-│   ├── App.jsx
-│   ├── index.css
-│   ├── main.jsx
-│   └── router.jsx
-├── .env.example
+│   │   ├── assessment_api.py
+│   │   └── auth_api.py
+│   │
+│   ├── pipelines/
+│   │   ├── pipeline_utils.py
+│   │   └── video_processing.py
+│   │
+│   ├── database.py
+│   ├── main.py
+│   ├── models_db.py
+│   ├── requirements.txt
+│   └── .venv/              # Local only, not committed
+│
+├── frontend/
+│   ├── src/
+│   │   ├── api/
+│   │   ├── assets/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── routes/
+│   │   └── utils/
+│   │
+│   ├── package.json
+│   └── ...
+│
 ├── .gitignore
-├── eslint.config.js
-├── index.html
-├── package-lock.json
-├── package.json
-├── vite.config.js
 └── README.md
 ```
 
 ---
 
-## Application Architecture
+# Backend Setup
 
-```text
-                        Chitta Shanti
-                              │
-                       React Frontend
-                              │
-             ┌────────────────┼────────────────┐
-             │                │                │
-          Candidate        Commander      Medical Officer
-             │                │                │
-        Assessment          Roster          Welfare
-             │                              Triage
-      ┌──────┼──────┐                    Intervention
-      │      │      │
-   Question Video Questionnaire
-      │      │      │
-      └──────┼──────┘
-             │
-          Results
-```
+## Requirements
 
-API communication is separated from UI components through `src/api/`, while authentication state is handled through React context and protected routes.
+Install:
+
+- Python 3.10+
+- MongoDB
+- Node.js and npm for the frontend
+
+The backend has been tested with Python 3.13.1 and MongoDB 8.3.11 during development.
 
 ---
 
-## Assessment Workflow
-
-The intended candidate assessment flow is:
-
-```text
-Start Assessment
-       │
-       ▼
-Receive Question
-       │
-       ▼
-Record Video Response
-       │
-       ▼
-Submit Video
-       │
-       ▼
-Complete Questionnaire
-       │
-       ▼
-Submit Answers
-       │
-       ▼
-Assessment Processing
-       │
-       ▼
-View Result
-```
-
-The backend is responsible for processing submitted assessment data and generating the relevant evaluation.
-
----
-
-## Getting Started
-
-### Prerequisites
-
-Make sure the following are installed:
-
-- Node.js
-- npm
-- Git
-
-Check your versions:
+## 1. Navigate to the Backend
 
 ```bash
-node --version
-npm --version
-```
-
-### Installation
-
-Clone the repository and enter the frontend directory:
-
-```bash
-git clone <YOUR-FRONTEND-REPOSITORY-URL>
-cd frontend
-npm install
+cd Backend
 ```
 
 ---
 
-## Environment Variables
+## 2. Create a Virtual Environment
 
-Create a local `.env` file and use `.env.example` as a reference.
+### Windows
+
+```powershell
+python -m venv .venv
+```
+
+Activate it:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+### Linux/macOS
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+---
+
+## 3. Install Backend Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## 4. Configure Environment Variables
+
+Create a `.env` file inside `Backend/`.
 
 Example:
 
 ```env
-VITE_API_URL=http://localhost:8000
+MONGO_URI=mongodb://localhost:27017
+MONGO_DB_NAME=stress_detector
 ```
 
-> **Security:** Do not place private API keys, database credentials, JWT signing secrets, or other backend secrets in Vite environment variables. Frontend environment variables are exposed to the browser.
+Do not commit the actual `.env` file to GitHub.
 
 ---
 
-## Running the Development Server
+## 5. Start MongoDB
+
+MongoDB must be running before starting the backend.
+
+The default database configuration is:
+
+```text
+MongoDB URI: mongodb://localhost:27017
+Database:    stress_detector
+```
+
+These values can be overridden through the `.env` file.
+
+---
+
+## 6. Start the FastAPI Server
+
+From the `Backend` directory:
+
+```bash
+python -m uvicorn main:app --reload
+```
+
+The backend will normally be available at:
+
+```text
+http://127.0.0.1:8000
+```
+
+Swagger API documentation:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+---
+
+# Frontend Setup
+
+Open a second terminal and navigate to the frontend:
+
+```bash
+cd frontend
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start the Vite development server:
 
 ```bash
 npm run dev
 ```
 
-The application will normally be available at:
+The frontend will normally be available at:
 
 ```text
 http://localhost:5173
@@ -257,204 +279,328 @@ http://localhost:5173
 
 ---
 
-## Production Build
+# Authentication
 
-Create a production build:
+Chitta Shanti uses JWT-based authentication.
+
+## Supported Roles
+
+### Candidate
+
+Candidates can:
+
+- Start a new assessment
+- Record an assessment response
+- Complete the wellbeing questionnaire
+- View their profile
+- Log out
+
+### Commander
+
+Commanders can access:
+
+- Command Centre
+- Personnel information
+- Profile
+
+### Medical Officer
+
+Medical Officers can access:
+
+- Medical Dashboard
+- Welfare triage
+- Welfare interventions
+- Profile
+
+---
+
+# Authentication API
+
+## Register
+
+```http
+POST /api/auth/register
+```
+
+Request body:
+
+```json
+{
+  "Username": "test_candidate",
+  "full_name": "Test Candidate",
+  "password": "Test@12345",
+  "role": "candidate",
+  "unit_id": "UNIT-TEST"
+}
+```
+
+---
+
+## Login
+
+```http
+POST /api/auth/login
+```
+
+The endpoint expects form-encoded credentials:
+
+```text
+username=<username>
+password=<password>
+```
+
+Successful authentication returns:
+
+```json
+{
+  "access_token": "...",
+  "token_type": "bearer",
+  "role": "candidate"
+}
+```
+
+---
+
+## Current User
+
+```http
+GET /api/auth/me
+```
+
+Requires:
+
+```http
+Authorization: Bearer <access_token>
+```
+
+Example response:
+
+```json
+{
+  "user_id": "test_candidate",
+  "full_name": "Test Candidate",
+  "role": "candidate",
+  "unit_id": "UNIT-TEST"
+}
+```
+
+---
+
+# Assessment API
+
+The backend currently exposes the full evaluation endpoint:
+
+```http
+POST /api/assessment/full-evaluate
+```
+
+The endpoint accepts:
+
+- Assessment video
+- Duty-hours streak
+- Relaxation hours preceding the assessment
+
+Authentication is required.
+
+The endpoint returns information including:
+
+- Session ID
+- Personnel ID
+- Readiness status
+- Classification
+- Stress probability
+- SHAP attribution
+- Timestamp
+
+The frontend assessment workflow is currently being integrated with this endpoint.
+
+Questionnaire submission is planned for the next stage of backend development.
+
+---
+
+# Welfare API
+
+## Commander Roster
+
+```http
+GET /api/assessment/commander/roster
+```
+
+Accessible to:
+
+- Commander
+- Medical Officer
+
+---
+
+## Welfare Triage
+
+```http
+GET /api/assessment/welfare/triage
+```
+
+Accessible to:
+
+- Medical Officer
+
+---
+
+## Record Welfare Intervention
+
+```http
+POST /api/assessment/welfare/interventions
+```
+
+Example:
+
+```json
+{
+  "personnel_id": "PERSONNEL_ID",
+  "action_type": "Mandatory Rest",
+  "notes": "Recommended additional rest and follow-up."
+}
+```
+
+Accessible to:
+
+- Medical Officer
+
+---
+
+# Frontend Authentication Flow
+
+```text
+User
+ │
+ ▼
+Login Page
+ │
+ ▼
+POST /api/auth/login
+ │
+ ▼
+JWT + Role
+ │
+ ▼
+localStorage
+ │
+ ├───────────────┐
+ ▼               ▼
+RoleRoute      /api/auth/me
+ │               │
+ ▼               ▼
+Dashboard       Profile
+```
+
+Logout clears the stored authentication information and redirects the user to the login page.
+
+---
+
+# Candidate Assessment Flow
+
+The current frontend assessment workflow consists of four stages:
+
+```text
+1. Prompt
+      ↓
+2. Video Recording
+      ↓
+3. Wellbeing Questionnaire
+      ↓
+4. Assessment Result
+```
+
+The current frontend captures the recorded video as a browser `Blob`.
+
+Backend integration is being developed so that the recorded video and questionnaire information can be submitted to the appropriate API.
+
+---
+
+# Privacy and Security
+
+The system is designed around role-based access control.
+
+Authentication is enforced through JWT tokens, while backend endpoints restrict access based on user roles.
+
+The frontend does not display or store user passwords.
+
+Environment files containing credentials or secrets must not be committed to the repository.
+
+For a production deployment, additional security controls should be implemented, including:
+
+- Secure secret management
+- HTTPS
+- Production CORS configuration
+- Stronger token/session management
+- Appropriate data-access auditing
+
+---
+
+# Development Notes
+
+This repository is currently under active development.
+
+Some frontend elements are placeholders where the backend functionality has not yet been implemented.
+
+In particular:
+
+- Assessment history requires a backend history endpoint.
+- Rank/designation is not currently returned by `/api/auth/me`.
+- Assessment statistics such as total assessments and last check-in require corresponding backend data.
+- Questionnaire submission is currently being redesigned for backend integration.
+
+These values should not be treated as production data until their corresponding backend functionality is implemented.
+
+---
+
+# Running the Project Locally
+
+Start MongoDB first.
+
+Then run the backend:
 
 ```bash
-npm run build
+cd Backend
 ```
 
-Preview the production build:
+### Windows
+
+```powershell
+.venv\Scripts\Activate.ps1
+python -m uvicorn main:app --reload
+```
+
+In a second terminal, run the frontend:
 
 ```bash
-npm run preview
-```
-
-Run ESLint:
-
-```bash
-npm run lint
-```
-
----
-
-## Routing
-
-Client-side routing is handled using React Router.
-
-The application is organized around routes such as:
-
-```text
-/
-├── /login
-├── /register
-├── /candidate
-│   ├── assessment
-│   ├── history
-│   └── profile
-├── /commander
-│   └── roster
-└── /welfare
-    ├── triage
-    └── interventions
-```
-
-Protected routes are intended to enforce role-based access.
-
----
-
-## API Integration
-
-API-related functionality is kept under:
-
-```text
-src/api/
-```
-
-Primary modules include:
-
-```text
-axiosClient.js
-authApi.js
-assessmentApi.js
-```
-
-This separation keeps UI components independent of the underlying HTTP implementation and makes backend integration easier to maintain.
-
----
-
-## Authentication and Authorization
-
-The application follows a role-based architecture:
-
-```text
-                    Authentication
-                          │
-             ┌────────────┼────────────┐
-             │            │            │
-         Candidate     Commander   Medical Officer
-             │            │            │
-        Candidate UI   Commander UI  Welfare UI
-```
-
-Authentication state is managed through:
-
-```text
-src/context/AuthContext.jsx
-```
-
-Reusable authentication logic is exposed through:
-
-```text
-src/hooks/useAuth.js
-```
-
-Protected pages use:
-
-```text
-src/components/common/ProtectedRoute.jsx
-```
-
----
-
-## Development Status
-
-### Current
-
-- [x] React/Vite frontend setup
-- [x] Tailwind CSS integration
-- [x] Application routing structure
-- [x] Homepage
-- [x] Authentication pages
-- [x] Login and registration UI
-- [x] Reusable component structure
-- [x] Authentication context architecture
-- [x] API layer structure
-- [x] Role-based application architecture
-
-### In Progress / Planned
-
-- [ ] Complete authentication API integration
-- [ ] Candidate assessment interface
-- [ ] Video recording and submission flow
-- [ ] Structured questionnaire
-- [ ] Assessment result interface
-- [ ] Candidate assessment history
-- [ ] Candidate profile
-- [ ] Commander personnel roster
-- [ ] Commander welfare overview
-- [ ] Medical officer triage dashboard
-- [ ] Intervention management
-- [ ] Final backend/frontend integration
-- [ ] Production deployment
-
----
-
-## Design Principles
-
-### 1. Role-based experience
-Each user role should have a focused interface containing only the tools required for that role.
-
-### 2. Reusable components
-Common UI elements are separated into reusable components to reduce duplication and simplify maintenance.
-
-### 3. Responsive design
-The interface is designed to work across desktop, tablet, and mobile screen sizes.
-
-### 4. Separation of concerns
-UI components, API communication, authentication state, hooks, and pages are kept in separate layers.
-
-### 5. Privacy-conscious design
-Because the platform deals with sensitive personnel welfare information, the frontend should avoid exposing confidential information unnecessarily and should rely on backend authorization for protected data.
-
----
-
-## Contributing
-
-When adding new functionality:
-
-1. Create reusable components where appropriate.
-2. Keep API calls inside the `src/api/` layer.
-3. Use the existing authentication and routing architecture.
-4. Never commit `.env` files or secrets.
-5. Test the application locally before committing.
-6. Run the linter before pushing major changes.
-
-Typical workflow:
-
-```bash
-git pull
-npm install
+cd frontend
 npm run dev
 ```
 
-After making changes:
+Then open:
 
-```bash
-npm run lint
-npm run build
-git status
-git add .
-git commit -m "Describe your change"
-git push
+```text
+http://localhost:5173
+```
+
+Backend API documentation:
+
+```text
+http://127.0.0.1:8000/docs
 ```
 
 ---
 
-## Project Context
+# Project Goal
 
-**Project:** Chitta Shanti  
-**Domain:** Personnel welfare and stress monitoring  
-**Target Users:** CAPFs / Armed Forces personnel and authorized officers  
-**Frontend:** React + Vite  
-**Backend:** FastAPI + MongoDB  
-**Authentication:** JWT + role-based access control  
+Chitta Shanti aims to provide an AI-assisted framework for identifying personnel stress indicators and supporting welfare-oriented decision making while maintaining role-appropriate access to sensitive assessment information.
+
+The system separates operational readiness information from detailed welfare information so that different levels of personnel receive information appropriate to their responsibilities.
 
 ---
 
-## License
+## Status
 
-This project is currently being developed as a prototype for the **Smart India Hackathon 2026**.
+**Active Development**
 
-Add an appropriate license if the project is later released as an open-source project.
+The current milestone focuses on establishing the complete authentication and role-based application foundation before integrating the candidate assessment submission pipeline.
