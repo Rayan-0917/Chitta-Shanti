@@ -1,3 +1,12 @@
+import { useCallback, useEffect } from "react";
+
+import {
+  getWelfareTriage,
+  recordWelfareIntervention,
+} from "./../../api/welfareApi";
+
+import { getAuthToken } from "../../utils/authToken";
+
 import {
   AlertTriangle,
   CheckCircle2,
@@ -12,53 +21,56 @@ import {
 } from "lucide-react";
 
 import Navbar from "../../components/common/Navbar";
+import { useState } from "react";
+import InterventionModal from "../../components/welfare/InterventionModal";
 
-
-/*
- * ---------------------------------------------------------
- * Demo data
- * ---------------------------------------------------------
- *
- * This follows the EXACT response structure of:
- *
- * GET /api/assessment/welfare/triage
- *
- * The API integration will be connected after the
- * intervention workflow is implemented.
- */
-
-const MOCK_TRIAGE_DATA = {
-  pending_triages: [
-    {
-      personnel_id: "CPF-2291-7A31",
-      risk_tier: "Critical",
-      primary_shap_driver:
-        "Heart rate variability indicates elevated fatigue.",
-      suggested_action:
-        "Clinical rest order & psychological check-in.",
-    },
-    {
-      personnel_id: "CPF-1842-B921",
-      risk_tier: "Critical",
-      primary_shap_driver:
-        "Recent duty and rest pattern indicates significant fatigue.",
-      suggested_action:
-        "Clinical rest order & psychological check-in.",
-    },
-    {
-      personnel_id: "CPF-3176-C482",
-      risk_tier: "Critical",
-      primary_shap_driver:
-        "Voice and physiological indicators suggest elevated stress.",
-      suggested_action:
-        "Clinical rest order & psychological check-in.",
-    },
-  ],
-};
 
 
 export default function MedicalOfficerDashboardPage() {
-  const triages = MOCK_TRIAGE_DATA.pending_triages;
+
+  const [triages, setTriages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
+
+  const [selectedTriage, setSelectedTriage] = useState(null);
+  const [isInterventionOpen, setIsInterventionOpen] =
+    useState(false);
+
+  const handleOpenIntervention = (triage) => {
+    setSelectedTriage(triage);
+    setIsInterventionOpen(true);
+  };
+
+  const handleCloseIntervention = () => {
+    setIsInterventionOpen(false);
+    setSelectedTriage(null);
+  };
+  const loadTriage = useCallback(async () => {
+    try {
+      setError("");
+
+      const token = getAuthToken();
+
+      const data = await getWelfareTriage(token);
+
+      setTriages(data?.pending_triages || []);
+    } catch (err) {
+      console.error("Failed to load welfare triage:", err);
+
+      setError(
+        err?.message ||
+        "Unable to load welfare triage."
+      );
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadTriage();
+  }, [loadTriage]);
 
   const criticalCount = triages.filter(
     (item) => item.risk_tier === "Critical"
@@ -66,7 +78,32 @@ export default function MedicalOfficerDashboardPage() {
 
   const pendingCount = triages.length;
 
+  const handleRefresh = () => {
+    setRefreshing(true);
+    loadTriage();
+  };
 
+  const handleInterventionSubmit = async (payload) => {
+  try {
+    const token = getAuthToken();
+
+    const result = await recordWelfareIntervention(
+      token,
+      payload
+    );
+
+    setTriages((previous) =>
+      previous.filter(
+        (item) => item.personnel_id !== payload.personnel_id
+      )
+    );
+
+    return result;
+  } catch (err) {
+    console.error("Failed to record intervention:", err);
+    throw err;
+  }
+};
   return (
     <div className="min-h-screen bg-[#fff5f8]">
       {/* Medical Officer navigation */}
@@ -150,31 +187,34 @@ export default function MedicalOfficerDashboardPage() {
             {/* Refresh button */}
             <button
               type="button"
+              onClick={handleRefresh}
+              disabled={refreshing}
               className="
-                inline-flex
-                min-h-[44px]
-                items-center
-                justify-center
-                gap-2
-                self-start
-                rounded-xl
-                border
-                border-[#efd6df]
-                bg-white
-                px-4
-                text-sm
-                font-semibold
-                text-[#a52252]
-                shadow-sm
-                transition
-                hover:bg-[#fff8fa]
-                active:scale-[0.98]
-                sm:self-auto
-              "
+    inline-flex
+    items-center
+    gap-2
+    rounded-xl
+    border
+    border-[#efd6df]
+    bg-white
+    px-4
+    py-2.5
+    text-sm
+    font-semibold
+    text-[#8d3152]
+    shadow-sm
+    transition
+    hover:bg-[#fff5f8]
+    disabled:cursor-not-allowed
+    disabled:opacity-60
+  "
             >
-              <RefreshCw size={17} />
+              <RefreshCw
+                size={17}
+                className={refreshing ? "animate-spin" : ""}
+              />
 
-              Refresh
+              {refreshing ? "Refreshing..." : "Refresh"}
             </button>
           </div>
 
@@ -227,7 +267,36 @@ export default function MedicalOfficerDashboardPage() {
               </p>
             </div>
           </div>
+          {error && (
+            <div
+              className="
+      mt-6
+      rounded-2xl
+      border
+      border-[#f1caca]
+      bg-[#fff5f5]
+      px-5
+      py-4
+    "
+            >
+              <div className="flex items-start gap-3">
+                <AlertTriangle
+                  size={20}
+                  className="mt-0.5 shrink-0 text-[#c95a5a]"
+                />
 
+                <div>
+                  <p className="text-sm font-semibold text-[#9f4141]">
+                    Unable to load welfare data
+                  </p>
+
+                  <p className="mt-1 text-sm leading-5 text-[#858b97]">
+                    {error}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* ==========================================
               Overview Statistics
@@ -342,7 +411,9 @@ export default function MedicalOfficerDashboardPage() {
 
 
             {/* Cases */}
-            {triages.length === 0 ? (
+            {loading ? (
+              <LoadingTriage />
+            ) : triages.length === 0 ? (
               <EmptyTriage />
             ) : (
               <div className="mt-6 space-y-4">
@@ -350,6 +421,9 @@ export default function MedicalOfficerDashboardPage() {
                   <TriageCard
                     key={`${triage.personnel_id}-${index}`}
                     triage={triage}
+                    onReview={() =>
+                      handleOpenIntervention(triage)
+                    }
                   />
                 ))}
               </div>
@@ -394,6 +468,12 @@ export default function MedicalOfficerDashboardPage() {
 
         </div>
       </main>
+      <InterventionModal
+        triage={selectedTriage}
+        isOpen={isInterventionOpen}
+        onClose={handleCloseIntervention}
+        onSubmit={handleInterventionSubmit}
+      />
     </div>
   );
 }
@@ -495,7 +575,10 @@ function OverviewCard({
    Triage Card
 ===================================================== */
 
-function TriageCard({ triage }) {
+function TriageCard({
+  triage,
+  onReview,
+}) {
   return (
     <div
       className="
@@ -617,24 +700,24 @@ function TriageCard({ triage }) {
       <div className="mt-5">
         <button
           type="button"
-          disabled
+          onClick={onReview}
           className="
-            inline-flex
-            min-h-[42px]
-            items-center
-            justify-center
-            gap-2
-            rounded-xl
-            border
-            border-[#efd6df]
-            bg-white
-            px-4
-            text-sm
-            font-semibold
-            text-[#a52252]
-            opacity-70
-          "
-          title="Intervention workflow will be added next"
+    inline-flex
+    min-h-[42px]
+    items-center
+    justify-center
+    gap-2
+    rounded-xl
+    bg-[#d12b63]
+    px-4
+    text-sm
+    font-semibold
+    text-white
+    shadow-[0_5px_14px_rgba(209,43,99,0.16)]
+    transition
+    hover:bg-[#a91f4e]
+    active:scale-[0.98]
+  "
         >
           <ClipboardList size={17} />
 
@@ -642,7 +725,7 @@ function TriageCard({ triage }) {
         </button>
 
         <p className="mt-2 text-xs text-[#9da0a8]">
-          Intervention recording will be enabled in the next step.
+          Record the medical or welfare action taken for this case.
         </p>
       </div>
     </div>
@@ -670,10 +753,9 @@ function RiskBadge({ riskTier }) {
         text-xs
         font-semibold
 
-        ${
-          isCritical
-            ? "bg-[#fff0f0] text-[#b04b4b]"
-            : "bg-[#fff6df] text-[#a66b08]"
+        ${isCritical
+          ? "bg-[#fff0f0] text-[#b04b4b]"
+          : "bg-[#fff6df] text-[#a66b08]"
         }
       `}
     >
@@ -683,10 +765,9 @@ function RiskBadge({ riskTier }) {
           w-2
           rounded-full
 
-          ${
-            isCritical
-              ? "bg-[#d15c5c]"
-              : "bg-[#d18a13]"
+          ${isCritical
+            ? "bg-[#d15c5c]"
+            : "bg-[#d18a13]"
           }
         `}
       />
@@ -744,6 +825,41 @@ function EmptyTriage() {
       <p className="mt-1 max-w-sm text-sm leading-5 text-[#858b97]">
         There are currently no personnel requiring medical
         attention.
+      </p>
+    </div>
+  );
+}
+
+function LoadingTriage() {
+  return (
+    <div
+      className="
+        mt-6
+        flex
+        flex-col
+        items-center
+        justify-center
+        rounded-2xl
+        border
+        border-dashed
+        border-[#efd6df]
+        bg-[#fffafb]
+        px-6
+        py-14
+        text-center
+      "
+    >
+      <RefreshCw
+        size={28}
+        className="animate-spin text-[#d12b63]"
+      />
+
+      <h3 className="mt-4 text-base font-semibold text-[#172033]">
+        Loading welfare reviews
+      </h3>
+
+      <p className="mt-1 text-sm text-[#858b97]">
+        Fetching the latest flagged cases.
       </p>
     </div>
   );

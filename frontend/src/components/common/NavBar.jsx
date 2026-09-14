@@ -6,7 +6,14 @@ import {
   Users,
   HeartHandshake,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+
+import { getCurrentUser } from "../../api/authApi";
+import {
+  clearAuthData,
+  getAuthToken,
+} from "../../utils/authToken";
 
 import logo from "../../assets/images/logo.png";
 
@@ -70,27 +77,45 @@ const NAVIGATION = {
 
 export default function Navbar({
   role = "candidate",
-  userName = "Calm Seeker",
+  userName = "User",
 }) {
   const location = useLocation();
   const navigate = useNavigate();
+
+  const [currentUserName, setCurrentUserName] =
+    useState(userName);
+
+  useEffect(() => {
+    async function loadCurrentUser() {
+      try {
+        const token = getAuthToken();
+
+        if (!token) {
+          return;
+        }
+
+        const user = await getCurrentUser(token);
+
+        setCurrentUserName(user.full_name);
+      } catch (err) {
+        console.error(
+          "Failed to load navbar user:",
+          err
+        );
+      }
+    }
+
+    loadCurrentUser();
+  }, [userName]);
 
   const navigation =
     NAVIGATION[role] || NAVIGATION.candidate;
 
 
-  const handleLogout = () => {
-    /*
-     * Authentication/logout will be connected here once
-     * the real JWT authentication flow is implemented.
-     */
-
-    console.log("Logout requested");
-
-    // Example for later:
-    // localStorage.removeItem("access_token");
-    // navigate("/login");
-  };
+const handleLogout = () => {
+  clearAuthData();
+  navigate("/login", { replace: true });
+};
 
 
   return (
@@ -239,12 +264,12 @@ export default function Navbar({
               shadow-[0_4px_10px_rgba(209,43,99,0.20)]
             "
           >
-            {getInitials(userName)}
+            {getInitials(currentUserName)}
           </div>
 
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-[#172033]">
-              {userName}
+              {currentUserName}
             </p>
 
             <p className="mt-0.5 text-xs text-[#858b97]">

@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { LockKeyhole, LogIn, UserRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+
+import { loginUser } from "../../api/authApi";
+import { saveAuthData } from "../../utils/authToken";
 import logo from "../../assets/images/logo.png";
 
 export default function LoginForm() {
@@ -8,21 +11,53 @@ export default function LoginForm() {
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+const [loading, setLoading] = useState(false);
+const [error, setError] = useState("");
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
+const handleSubmit = async (event) => {
+  event.preventDefault();
 
-    /*
-     * Backend authentication will be connected here.
-     *
-     * Do not invent an API endpoint until the actual
-     * backend authentication contract is confirmed.
-     */
-    console.log("Login submitted:", {
-      username,
-      password,
-    });
-  };
+  setError("");
+
+  try {
+    setLoading(true);
+
+    const authData = await loginUser(
+      username.trim(),
+      password
+    );
+
+    saveAuthData(authData);
+
+    switch (authData.role) {
+      case "candidate":
+        navigate("/candidate", { replace: true });
+        break;
+
+      case "commander":
+        navigate("/commander", { replace: true });
+        break;
+
+      case "medical_officer":
+        navigate("/medical", { replace: true });
+        break;
+
+      default:
+        throw new Error(
+          "Your account has an unrecognized role."
+        );
+    }
+  } catch (err) {
+    console.error("Login failed:", err);
+
+    setError(
+      err?.message ||
+        "Unable to log in. Please try again."
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div
@@ -132,14 +167,15 @@ export default function LoginForm() {
 
           <div className="relative flex-1">
             <input
-              type="text"
-              value={username}
-              onChange={(event) =>
-                setUsername(event.target.value)
-              }
-              placeholder="Enter Service ID / Username"
-              autoComplete="username"
-              required
+  type="text"
+  value={username}
+  onChange={(event) =>
+    setUsername(event.target.value)
+  }
+  placeholder="Enter Service ID / Username"
+  autoComplete="username"
+  required
+  disabled={loading}
               className="
                 w-full
                 rounded-xl
@@ -197,14 +233,15 @@ export default function LoginForm() {
 
           <div className="relative flex-1">
             <input
-              type="password"
-              value={password}
-              onChange={(event) =>
-                setPassword(event.target.value)
-              }
-              placeholder="Enter your password"
-              autoComplete="current-password"
-              required
+  type="password"
+  value={password}
+  onChange={(event) =>
+    setPassword(event.target.value)
+  }
+  placeholder="Enter your password"
+  autoComplete="current-password"
+  required
+  disabled={loading}
               className="
                 w-full
                 rounded-xl
@@ -253,39 +290,77 @@ export default function LoginForm() {
             Forgot Password?
           </button>
         </div>
-
+        {error && (
+  <div
+    className="
+      rounded-xl
+      border
+      border-[#f0cfd8]
+      bg-[#fff1f4]
+      px-4
+      py-3
+    "
+  >
+    <p className="text-sm leading-5 text-[#7d2947]">
+      {error}
+    </p>
+  </div>
+)}
         {/* Login button */}
         <div className="flex justify-center pt-3">
           <button
-            type="submit"
-            className="
-              flex
-              w-full
-              items-center
-              justify-center
-              gap-2
-              rounded-full
-              bg-[#ce2d5d]
-              px-8
-              py-3.5
-              text-base
-              font-bold
-              text-white
-              shadow-lg
-              shadow-[#ce2d5d]/30
-              transition
-              duration-200
-              hover:bg-[#b8204c]
-              active:scale-[0.99]
-              sm:w-2/3
-            "
-          >
-            <span>Login</span>
+  type="submit"
+  disabled={loading}
+  className="
+    flex
+    w-full
+    items-center
+    justify-center
+    gap-2
+    rounded-full
+    bg-[#ce2d5d]
+    px-8
+    py-3.5
+    text-base
+    font-bold
+    text-white
+    shadow-lg
+    shadow-[#ce2d5d]/30
+    transition
+    duration-200
+    hover:bg-[#b8204c]
+    active:scale-[0.99]
+    disabled:cursor-not-allowed
+    disabled:opacity-60
+    sm:w-2/3
+  "
+>
+            {loading ? (
+  <>
+    <span>Logging in...</span>
 
-            <LogIn
-              size={19}
-              strokeWidth={2}
-            />
+    <span
+      className="
+        h-4
+        w-4
+        animate-spin
+        rounded-full
+        border-2
+        border-white/40
+        border-t-white
+      "
+    />
+  </>
+) : (
+  <>
+    <span>Login</span>
+
+    <LogIn
+      size={19}
+      strokeWidth={2}
+    />
+  </>
+)}
           </button>
         </div>
       </form>

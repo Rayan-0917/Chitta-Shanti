@@ -1,8 +1,9 @@
+import { useEffect, useState } from "react";
+
 import {
   BadgeCheck,
   Building2,
   Check,
-  Info,
   LockKeyhole,
   Pencil,
   ShieldCheck,
@@ -10,25 +11,60 @@ import {
 } from "lucide-react";
 
 import Navbar from "../../components/common/Navbar";
+import { getCurrentUser } from "../../api/authApi";
+import { getAuthToken } from "../../utils/authToken";
 
 const DEMO_PROFILE = {
-  username: "CPF-2291",
-  fullName: "Calm Seeker",
-  role: "Candidate",
-  unitId: "4th Battalion, CRPF",
-  rank: "Head Constable",
+  username: "",
+  fullName: "",
+  role: "",
+  unitId: "",
+  rank: "Not provided",
 
-  // These are currently demo values because
-  // the backend profile endpoint is not connected yet.
-  assessmentsTaken: 2,
-  currentStatus: "Fit for Duty",
-  memberSince: "Jan 2026",
-  lastCheckIn: "Sept 10",
+  assessmentsTaken: "—",
+  currentStatus: "Not available",
+  memberSince: "—",
+  lastCheckIn: "—",
 };
+export default function ProfilePage() {
+  const [profile, setProfile] = useState(DEMO_PROFILE);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-export default function ProfilePage({
-  profile = DEMO_PROFILE,
-}) {
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        setLoading(true);
+        setError("");
+
+        const token = getAuthToken();
+
+        if (!token) {
+          throw new Error("No authentication token found.");
+        }
+
+        const user = await getCurrentUser(token);
+
+        setProfile((previous) => ({
+          ...previous,
+          username: user.user_id,
+          fullName: user.full_name,
+          role: user.role,
+          unitId: user.unit_id,
+        }));
+      } catch (err) {
+        console.error("Failed to load profile:", err);
+        setError(
+          err?.message || "Unable to load your profile."
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadProfile();
+  }, []);
+
   const initials = getInitials(profile.fullName);
 
   return (
@@ -97,25 +133,25 @@ export default function ProfilePage({
             <div className="flex items-center justify-between gap-4">
               {/* Demo account badge */}
               <div
-                className="
-                  inline-flex
-                  items-center
-                  gap-2
-                  rounded-full
-                  border
-                  border-[#f0dce3]
-                  bg-white
-                  px-3
-                  py-1.5
-                  text-xs
-                  font-semibold
-                  text-[#a52252]
-                  shadow-sm
-                "
-              >
-                <Info size={14} />
-                Demo Account
-              </div>
+  className="
+    inline-flex
+    items-center
+    gap-2
+    rounded-full
+    border
+    border-[#d8ead9]
+    bg-white
+    px-3
+    py-1.5
+    text-xs
+    font-semibold
+    text-[#477a47]
+    shadow-sm
+  "
+>
+  <ShieldCheck size={14} />
+  Verified Account
+</div>
 
               {/* Edit Profile */}
               <button

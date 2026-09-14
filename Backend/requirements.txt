@@ -1,0 +1,14 @@
+fastapi
+uvicorn[standard]
+pymongo[srv]
+python-dotenv
+passlib[bcrypt]
+python-jose[cryptography]
+python-multipart
+opencv-python
+mediapipe
+numpy
+scipy
+librosa
+joblib
+google-genai
